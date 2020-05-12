@@ -1,26 +1,60 @@
+import { BrowserRouter as Router, Route, NavLink, Switch } from 'react-router-dom';
+import { PrivateRoute } from './_helpers/private-route'
+import { history } from './_helpers';
+import { alertActions } from './_actions/alert.action';
+import { connect } from 'react-redux'
 import React from 'react';
-import logo from './logo.svg';
+import Navigation from './containers/Navigation'
+import Home from './containers/Home'
+import User from './containers/User'
+import MyPlaylists from './containers/UserPlaylists'
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends React.Component {
+
+  constructor(props) {
+    super(props);
+
+    const { dispatch } = this.props;
+    history.listen((location, action) => {
+        // clear alert on location change
+        dispatch(alertActions.clear());
+      });
+  }
+
+  render() {
+    return (
+      <div className="">
+        <Router history={history}>
+          <Navigation />
+          <Switch>
+
+            {/* Home and Default Paths */}
+            <Route exact path="/" component={Home} />
+            <Route exact path="/home" component={Home} />
+
+            {/* User Paths */}
+            <Route exact path="/user" component={User} />
+            <PrivateRoute exact path="/user/panel" component={User} />
+            <PrivateRoute exact path="/user/playlists" component={MyPlaylists} />
+            <Route exact path="/user/login" component={User} />
+            <Route exact path="/user/register" component={User} />
+
+            {/* <Route path={`/accounts/:accountId`} component={Profile} /> */}
+
+          </Switch>
+        
+        </Router>
+      </div>
+    );
+  }
 }
 
-export default App;
+function mapStateToProps(state) {
+  const { alert } = state;
+  return {
+      alert
+  };
+}
+
+export default connect(mapStateToProps)(App);
